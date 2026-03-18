@@ -1,0 +1,47 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id         String     @id @default(cuid())
+  supabaseId String     @unique
+  email      String     @unique
+  name       String?
+  imageUrl   String?
+  documents  Document[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Document {
+  id          String     @id @default(cuid())
+  title       String     @default("Untitled")
+  content     String?    @db.Text
+  coverImage  String?
+  icon        String?
+  isPublished Boolean    @default(false)
+  isArchived  Boolean    @default(false)
+  parentId    String?
+  parent      Document?  @relation("ParentChild", fields: [parentId], references: [id])
+  children    Document[] @relation("ParentChild")
+  userId      String
+  user        User       @relation(fields: [userId], references: [id])
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([parentId])
+}
