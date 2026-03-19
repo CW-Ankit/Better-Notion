@@ -1,27 +1,27 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import { SignOutButton } from "@/components/sign-out-button";
+"use client";
 
-export default async function DocumentsPage() {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
+import { useRouter } from "next/navigation";
+import { PlusCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { createDocument } from "@/lib/actions/documents";
 
-  if (!data?.claims) {
-    redirect("/auth/login");
-  }
+export default function DocumentsPage() {
+  const router = useRouter();
+
+  const handleCreate = async () => {
+    const doc = await createDocument();
+    router.push(`/documents/${doc.id}`);
+  };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">My Documents</h1>
-          <p className="text-gray-600">Welcome, {data.claims.email}</p>
-        </div>
-        <SignOutButton />
-      </div>
-      <div className="mt-8 rounded-lg border border-dashed p-12 text-center text-gray-500">
-        No documents yet. Start creating!
-      </div>
+    <div className="flex h-full flex-col items-center justify-center gap-4">
+      <h2 className="text-lg font-medium text-muted-foreground">
+        No document selected
+      </h2>
+      <Button onClick={handleCreate} variant="outline" size="sm">
+        <PlusCircle className="mr-2 h-4 w-4" />
+        Create a page
+      </Button>
     </div>
   );
 }
